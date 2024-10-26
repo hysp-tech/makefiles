@@ -1,4 +1,4 @@
-.PHONY: docker-compose-build docker-compose-up docker-compose-test docker-compose-shell docker-compose-bash
+.PHONY: docker-compose-build docker-compose-up docker-compose-shell docker-compose-bash
 
 docker-compose-build:  ## Build the app
 	docker compose build
