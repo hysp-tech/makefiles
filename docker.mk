@@ -6,11 +6,8 @@ docker-compose-build:  ## Build the app
 docker-compose-up:  ## Run app with rebuild
 	docker compose up --build
 
-docker-compose-test: # Run test
-	docker compose up --build test
-
 docker-compose-shell: # Run shell backend
 	docker compose up -d --build shell
 
-docker-compose-bash: shell  ## Connect to a bash within the docker image
+docker-compose-bash: docker-compose-shell  ## Connect to a bash within the docker image
 	docker compose exec shell bash

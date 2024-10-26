@@ -6,4 +6,5 @@ docker-ci-shell: # Create CI shell backend
 docker-ci-bash: ci-shell  # Connect to a bash within the tool image(faster), for running task like `poetry lock`
 	docker compose -f docker-compose-ci.yml exec shell bash
 
-
+docker-compose-test: # Run test
+	docker compose -f docker-compose-ci.yml up --build test
