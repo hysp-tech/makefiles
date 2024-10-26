@@ -1,4 +1,16 @@
-.PHONY: docker-compose-up-build
+.PHONY: docker-compose-build docker-compose-up docker-compose-test docker-compose-shell docker-compose-bash
 
-docker-compose-up-build:  ## Run app with rebuild
+docker-compose-build:  ## Build the app
+	docker compose build
+
+docker-compose-up:  ## Run app with rebuild
 	docker compose up --build
+
+docker-compose-test: # Run test
+	docker compose up --build test
+
+docker-compose-shell: # Run shell backend
+	docker compose up -d --build shell
+
+docker-compose-bash: shell  ## Connect to a bash within the docker image
+	docker compose exec shell bash
