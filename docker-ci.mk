@@ -9,5 +9,5 @@ docker-ci-bash: ci-shell  # Connect to a bash within the tool image(faster), for
 docker-test: ## Run unit test
 	docker compose -f docker-compose-ci.yml up --build test
 
-docker-int-test: ## Run intergation test
-	docker compose -f docker-compose-ci.yml up --build test
+docker-test-int: ## Run intergation test
+	docker compose -f docker-compose-ci.yml up --build test-int
