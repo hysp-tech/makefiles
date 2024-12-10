@@ -13,7 +13,9 @@ for line in sys.stdin:
 endef
 export PRINT_HELP_PYSCRIPT
 
+PYTHON := $(shell command -v python3 2>/dev/null || command -v python 2>/dev/null)
+
 .PHONY: help
 help:
 	@echo "===== All tasks ====="
-	@cat $(MAKEFILE_LIST) | python -c "$$PRINT_HELP_PYSCRIPT"
+	@cat $(MAKEFILE_LIST) | $(PYTHON) -c "$$PRINT_HELP_PYSCRIPT"
