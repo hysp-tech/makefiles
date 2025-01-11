@@ -7,7 +7,13 @@ docker-ci-bash: ci-shell  # Connect to a bash within the tool image(faster), for
 	docker compose -f docker-compose-ci.yml exec shell bash
 
 docker-test: ## Run unit test
-	docker compose -f docker-compose-ci.yml up --build test
+	@echo "Running unit tests..."
+	docker compose -f docker-compose-ci.yml up --build -d
+	docker compose -f docker-compose-ci.yml run --rm -e TEST_FILES=$(TEST_FILES) test
+	docker compose -f docker-compose-ci.yml down
 
-docker-test-int: ## Run intergation test
-	docker compose -f docker-compose-ci.yml up --build test-int
+docker-test-int: ## Run integration test
+	@echo "Running integration tests..."
+	docker compose -f docker-compose-ci.yml up --build -d
+	docker compose -f docker-compose-ci.yml run --rm -e TEST_FILES=$(TEST_FILES) test-int
+	docker compose -f docker-compose-ci.yml down
