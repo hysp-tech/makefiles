@@ -13,5 +13,5 @@ docker-test: ## Run unit test, e.g make docker-test TEST_FILES='./a/x.py ./a/y.p
 
 docker-test-int: ## Run integration test
 	@echo "Running integration tests..."
-	docker compose -f docker-compose-ci.yml build test
+	docker compose -f docker-compose-ci.yml build test-int
 	docker compose -f docker-compose-ci.yml run --rm -e TEST_FILES=$(TEST_FILES) test-int
