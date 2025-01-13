@@ -19,3 +19,11 @@ PYTHON := $(shell command -v python3 2>/dev/null || command -v python 2>/dev/nul
 help:
 	@echo "===== All tasks ====="
 	@cat $(MAKEFILE_LIST) | $(PYTHON) -c "$$PRINT_HELP_PYSCRIPT"
+
+.PHONY: makefiles-git-pull
+makefiles-git-pull:
+	@cd makefiles && \
+	git checkout master && \
+	git pull origin master
+	git add makefiles 
+	echo "You may know commit the change on makefiles submodule"
