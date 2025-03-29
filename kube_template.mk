@@ -7,7 +7,11 @@ HELM := helm
 
 # default params for local helm chart
 HELM_REPO_URL ?= $(shell git rev-parse --show-toplevel)/helm
+# for local helm chart, name should be same as APP
 HELM_CHART ?= $(APP)
+# for local helm chart, repo is the url of the chart
+HELM_REPO ?= $(HELM_REPO_URL)
+
 ENV ?= dev
 TAG ?= undefined
 USE_LOCAL_CHART ?= true
@@ -16,8 +20,6 @@ DRY_RUN ?= false
 # Define dry run flag based on DRY_RUN value
 HELM_DRY_RUN := $(if $(filter true,$(DRY_RUN)),--dry-run,)
 
-# Define repo path based on USE_LOCAL_CHART
-HELM_REPO := $(if $(filter true,$(USE_LOCAL_CHART)),$(HELM_REPO_URL),$(HELM_REPO_NAME))
 
 # Shared target
 .PHONY: init
@@ -26,7 +28,7 @@ init:  ## Add helm repo
 	@if [ "$(USE_LOCAL_CHART)" = true ]; then \
 		echo "Local repo doesn't need init"; \
 	else \
-		$(HELM) repo add $(HELM_REPO_NAME) $(HELM_REPO_URL); \
+		$(HELM) repo add $(HELM_REPO) $(HELM_REPO_URL); \
 	fi
 
 
