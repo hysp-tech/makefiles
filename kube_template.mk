@@ -6,7 +6,7 @@ KUBECTL := kubectl
 HELM := helm
 
 # default params for local helm chart
-HELM_REPO_URL ?= $(shell git rev-parse --show-toplevel)/helm
+HELM_REPO_URL ?= $(shell git rev-parse --show-toplevel)/kube/helm
 # for local helm chart, name should be same as APP
 HELM_CHART ?= $(APP)
 # for local helm chart, repo is the url of the chart
