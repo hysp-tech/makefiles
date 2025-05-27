@@ -1,6 +1,6 @@
-# For customized kube
-KUBECTL := kubectl --kubecofig=$(shell git rev-parse --show-toplevel)/kubeconfig/dashboard-admin.yaml
-HELM := helm --kubeconfig=$(shell git rev-parse --show-toplevel)/kubeconfig/dashboard-admin.yaml
+# For customized kube/helm in .envrc
+KUBECTL ?= kubectl
+HELM ?= helm
 
 
 # default params for local helm chart
@@ -39,6 +39,7 @@ deploy: init ## deploy release with helm
 .PHONY: upgrade
 upgrade:  ## upgrade release with helm
 	@echo "upgrade $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
+	@echo $(HELM) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN)
 	@if [ "$(TAG)" != "undefined" ] ; then \
 		$(HELM) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml --set image.tag=$(TAG) $(HELM_DRY_RUN); \
 	else \
@@ -54,12 +55,13 @@ show:  ## Show release with helm
 .PHONY: delete
 delete:  ## Delete release with helm
 	@if [ "$(NO_INTERACTION)" != "YES" ] ; then \
+		echo $(HELM) -n $(NS) uninstall $(APP)-$(ENV) $(HELM_DRY_RUN); \
 		read -p "Do you want to delete $(APP) in $(ENV) env? [y/N]: " answer; \
 		if [ "$$answer" != "y" ]; then \
 			echo "Aborted."; exit 1; \
 		fi \
 	fi
-	@if $(HELM) status $(APP)-$(ENV) > /dev/null 2>&1; then \
+	@if $(HELM) -n $(NS) status $(APP)-$(ENV) > /dev/null 2>&1; then \
 		$(HELM) -n $(NS) uninstall $(APP)-$(ENV) $(HELM_DRY_RUN); \
 	else \
 		echo "$(APP) in $(ENV) env is not deployed. Nothing to delete."; \
