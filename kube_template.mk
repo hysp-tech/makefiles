@@ -1,12 +1,10 @@
 # For customized kube
-#KUBECONFIG := ${HOME}/.kube/config
-#KUBECTL := $(KUBECTL_CMD) --kubeconfig=$(KUBECONFIG)
-#HELM := $(HELM_CMD) --kubeconfig=$(KUBECONFIG)
-KUBECTL := kubectl
-HELM := helm
+KUBECTL := kubectl --kubecofig=$(shell git rev-parse --show-toplevel)/kubeconfig/dashboard-admin.yaml
+HELM := helm --kubeconfig=$(shell git rev-parse --show-toplevel)/kubeconfig/dashboard-admin.yaml
+
 
 # default params for local helm chart
-HELM_REPO_URL ?= $(shell git rev-parse --show-toplevel)/kube/helm
+HELM_REPO_URL ?= $(shell git rev-parse --show-toplevel)/helm
 # for local helm chart, name should be same as APP
 HELM_CHART ?= $(APP)
 # for local helm chart, repo is the url of the chart
@@ -35,16 +33,16 @@ init:  ## Add helm repo
 .PHONY: deploy
 deploy: init ## deploy release with helm
 	@echo "deploy $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
-	$(HELM) install $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN)
+	$(HELM) -n $(NS) install $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN)
 
 
 .PHONY: upgrade
 upgrade:  ## upgrade release with helm
 	@echo "upgrade $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
 	@if [ "$(TAG)" != "undefined" ] ; then \
-		$(HELM) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml --set image.tag=$(TAG) $(HELM_DRY_RUN); \
+		$(HELM) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml --set image.tag=$(TAG) $(HELM_DRY_RUN); \
 	else \
-		$(HELM) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN); \
+		$(HELM) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN); \
 	fi
 
 .PHONY: show
@@ -62,7 +60,7 @@ delete:  ## Delete release with helm
 		fi \
 	fi
 	@if $(HELM) status $(APP)-$(ENV) > /dev/null 2>&1; then \
-		$(HELM) uninstall $(APP)-$(ENV) $(HELM_DRY_RUN); \
+		$(HELM) -n $(NS) uninstall $(APP)-$(ENV) $(HELM_DRY_RUN); \
 	else \
 		echo "$(APP) in $(ENV) env is not deployed. Nothing to delete."; \
 	fi

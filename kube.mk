@@ -1,48 +1,24 @@
-# Set NS as alias for NAMESPACE if NAMESPACE is not set
-NAMESPACE ?= $(NS)
+NS ?= default
 
 ### Command of kube app deployment ###
-kube-deploy: _kube-check-input ## Deploy kube app: make kube-deploy [NAMESPACE=nexus] APP=my_app [ENV=dev] [DRY_RUN=true]
-	@if [ -n "$(NAMESPACE)" ]; then \
-		make -C kube/$(NAMESPACE)/$(APP) deploy; \
-	else \
-		make -C kube/apps/$(APP) deploy; \
-	fi
+kube-deploy: _kube-check-input ## Deploy kube app: make kube-deploy [NS=nexus] APP=my_app [ENV=dev] [DRY_RUN=true]
+	@make -C kube/$(NS)/$(APP) deploy
 
-kube-upgrade: _kube-check-input ## Upgrade kube app: make kube-upgrade [NAMESPACE=nexus] APP=my_app [ENV=dev] [DRY_RUN=true] [TAG=latest]
-	@if [ -n "$(NAMESPACE)" ]; then \
-		make -C kube/$(NAMESPACE)/$(APP) upgrade; \
-	else \
-		make -C kube/apps/$(APP) upgrade; \
-	fi
+kube-upgrade: _kube-check-input ## Upgrade kube app: make kube-upgrade [NS=nexus] APP=my_app [ENV=dev] [DRY_RUN=true] [TAG=latest]
+	@make -C kube/$(NS)/$(APP) upgrade
 
-kube-delete: _kube-check-input ## Delete app: make kube-delete [NAMESPACE=nexus] APP=my_app [ENV=dev] [DRY_RUN=true]
-	@if [ -n "$(NAMESPACE)" ]; then \
-		make -C kube/$(NAMESPACE)/$(APP) delete; \
-	else \
-		make -C kube/apps/$(APP) delete; \
-	fi
+kube-delete: _kube-check-input ## Delete app: make kube-delete [NS=nexus] APP=my_app [ENV=dev] [DRY_RUN=true]
+	@make -C kube/$(NS)/$(APP) delete
 
-kube-show: _kube-check-input ## Show app yaml: make kube-show [NAMESPACE=nexus] APP=my_app [ENV=dev]
-	@if [ -n "$(NAMESPACE)" ]; then \
-		make -C kube/$(NAMESPACE)/$(APP) show; \
-	else \
-		make -C kube/apps/$(APP) show; \
-	fi
+kube-show: _kube-check-input ## Show app yaml: make kube-show [NS=nexus] APP=my_app [ENV=dev]
+	@make -C kube/$(NS)/$(APP) show
 
 _kube-check-input:
 	@if [ -z "$(APP)" ]; then \
 		echo "Invalid input: APP parameter is required"; \
 		exit 1; \
 	fi
-	@if [ -n "$(NAMESPACE)" ]; then \
-		if [ ! -f "kube/$(NAMESPACE)/$(APP)/Makefile" ]; then \
-			echo "Invalid input: kube/$(NAMESPACE)/$(APP)/Makefile does not exist"; \
-			exit 1; \
-		fi \
-	else \
-		if [ ! -f "kube/apps/$(APP)/Makefile" ]; then \
-			echo "Invalid input: kube/apps/$(APP)/Makefile does not exist"; \
-			exit 1; \
-		fi \
+	@if [ ! -f "kube/$(NS)/$(APP)/Makefile" ]; then \
+		echo "Invalid input: kube/$(NS)/$(APP)/Makefile does not exist"; \
+		exit 1; \
 	fi
