@@ -1,3 +1,6 @@
+# Set NS as alias for NAMESPACE if NAMESPACE is not set
+NAMESPACE ?= $(NS)
+
 ### Command of kube app deployment ###
 kube-deploy: _kube-check-input ## Deploy kube app: make kube-deploy [NAMESPACE=nexus] APP=my_app [ENV=dev] [DRY_RUN=true]
 	@if [ -n "$(NAMESPACE)" ]; then \
