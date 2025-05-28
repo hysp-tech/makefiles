@@ -2,7 +2,7 @@
 KUBECTL ?= kubectl
 HELM ?= helm
 
-KUBECONFIG ?= $(shell git rev-parse --show-toplevel)/kubeconfig/kubernetes-dashboard-admin.yaml
+KUBECONFIG ?= $(shell git rev-parse --show-toplevel)/${KUBE_CONFIG:kubeconfig/kubernetes-dashboard-admin.yaml}
 
 # default params for local helm chart
 HELM_REPO_URL ?= $(shell git rev-parse --show-toplevel)/helm
@@ -32,13 +32,13 @@ init:  ## Add helm repo
 
 
 .PHONY: deploy
-deploy: init ## deploy release with helm
+deploy: _check_kubeconfig init ## deploy release with helm
 	@echo "deploy $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
 	$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) install $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN)
 
 
 .PHONY: upgrade
-upgrade:  ## upgrade release with helm
+upgrade:  _check_kubeconfig ## upgrade release with helm
 	@echo "upgrade $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
 	@if [ "$(TAG)" != "undefined" ] ; then \
 		$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml --set image.tag=$(TAG) $(HELM_DRY_RUN); \
@@ -53,7 +53,7 @@ show:  ## Show release with helm
 
 
 .PHONY: delete
-delete:  ## Delete release with helm
+delete:  _check_kubeconfig ## Delete release with helm
 	@if [ "$(NO_INTERACTION)" != "YES" ] ; then \
 		echo $(HELM) -n $(NS) uninstall $(APP)-$(ENV) $(HELM_DRY_RUN); \
 		read -p "Do you want to delete $(APP) in $(ENV) env? [y/N]: " answer; \
@@ -66,3 +66,12 @@ delete:  ## Delete release with helm
 	else \
 		echo "$(APP) in $(ENV) env is not deployed. Nothing to delete."; \
 	fi
+
+.PHONY: _check_kubeconfig
+_check_kubeconfig:
+	@if [ ! -f "$(KUBECONFIG)" ]; then \
+		echo "Error: KUBECONFIG file does not exist at $(KUBECONFIG)"; \
+		exit 1; \
+	fi
+	@echo "Using KUBECONFIG: $(KUBECONFIG)"
+	$(KUBECTL) --kubeconfig $(KUBECONFIG) version
