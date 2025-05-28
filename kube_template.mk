@@ -2,7 +2,7 @@
 KUBECTL ?= kubectl
 HELM ?= helm
 
-KUBECONFIG ?= $(shell git rev-parse --show-toplevel)/${KUBE_CONFIG:kubeconfig/kubernetes-dashboard-admin.yaml}
+KUBECONFIG ?= $(shell git rev-parse --show-toplevel)/kubeconfig/kubernetes-dashboard-admin.yaml
 
 # default params for local helm chart
 HELM_REPO_URL ?= $(shell git rev-parse --show-toplevel)/helm
@@ -71,6 +71,8 @@ delete:  _check_kubeconfig ## Delete release with helm
 _check_kubeconfig:
 	@if [ ! -f "$(KUBECONFIG)" ]; then \
 		echo "Error: KUBECONFIG file does not exist at $(KUBECONFIG)"; \
+		echo "Please set the KUBECONFIG environment variable to point to your kubeconfig file."; \
+		echo "You can set it with abs_path like this: export KUBECONFIG=/abs_path/to/your/kubeconfig.yaml"; \
 		exit 1; \
 	fi
 	@echo "Using KUBECONFIG: $(KUBECONFIG)"
