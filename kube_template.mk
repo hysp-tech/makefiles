@@ -2,6 +2,7 @@
 KUBECTL ?= kubectl
 HELM ?= helm
 
+KUBECONFIG ?= $(shell git rev-parse --show-toplevel)/kubeconfig/kubernetes-dashboard-admin.yaml
 
 # default params for local helm chart
 HELM_REPO_URL ?= $(shell git rev-parse --show-toplevel)/helm
@@ -33,17 +34,16 @@ init:  ## Add helm repo
 .PHONY: deploy
 deploy: init ## deploy release with helm
 	@echo "deploy $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
-	$(HELM) -n $(NS) install $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN)
+	$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) install $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN)
 
 
 .PHONY: upgrade
 upgrade:  ## upgrade release with helm
 	@echo "upgrade $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
-	@echo $(HELM) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN)
 	@if [ "$(TAG)" != "undefined" ] ; then \
-		$(HELM) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml --set image.tag=$(TAG) $(HELM_DRY_RUN); \
+		$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml --set image.tag=$(TAG) $(HELM_DRY_RUN); \
 	else \
-		$(HELM) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN); \
+		$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN); \
 	fi
 
 .PHONY: show
@@ -61,8 +61,8 @@ delete:  ## Delete release with helm
 			echo "Aborted."; exit 1; \
 		fi \
 	fi
-	@if $(HELM) -n $(NS) status $(APP)-$(ENV) > /dev/null 2>&1; then \
-		$(HELM) -n $(NS) uninstall $(APP)-$(ENV) $(HELM_DRY_RUN); \
+	@if $(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) status $(APP)-$(ENV) > /dev/null 2>&1; then \
+		$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) uninstall $(APP)-$(ENV) $(HELM_DRY_RUN); \
 	else \
 		echo "$(APP) in $(ENV) env is not deployed. Nothing to delete."; \
 	fi
