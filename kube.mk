@@ -1,16 +1,16 @@
 NS ?= default
 
 ### Command of kube app deployment ###
-kube-deploy: _kube-check-input ## Deploy kube app: make kube-deploy [NS=nexus] APP=my_app [ENV=dev] [DRY_RUN=true]
+kube-deploy: _kube-check-input ## Deploy kube app: make kube-deploy [NS=default] APP=my_app [ENV=dev] [DRY_RUN=true]
 	@make -C kube/$(NS)/$(APP) deploy
 
-kube-upgrade: _kube-check-input ## Upgrade kube app: make kube-upgrade [NS=nexus] APP=my_app [ENV=dev] [DRY_RUN=true] [TAG=latest]
+kube-upgrade: _kube-check-input ## Upgrade kube app: make kube-upgrade [NS=default] APP=my_app [ENV=dev] [DRY_RUN=true] [TAG=latest]
 	@make -C kube/$(NS)/$(APP) upgrade
 
-kube-delete: _kube-check-input ## Delete app: make kube-delete [NS=nexus] APP=my_app [ENV=dev] [DRY_RUN=true]
+kube-delete: _kube-check-input ## Delete app: make kube-delete [NS=default] APP=my_app [ENV=dev] [DRY_RUN=true]
 	@make -C kube/$(NS)/$(APP) delete
 
-kube-show: _kube-check-input ## Show app yaml: make kube-show [NS=nexus] APP=my_app [ENV=dev]
+kube-show: _kube-check-input ## Show app yaml: make kube-show [NS=default] APP=my_app [ENV=dev]
 	@make -C kube/$(NS)/$(APP) show
 
 _kube-check-input:
