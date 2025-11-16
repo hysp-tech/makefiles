@@ -15,9 +15,16 @@ ENV ?= dev
 TAG ?= undefined
 USE_LOCAL_CHART ?= true
 DRY_RUN ?= false
+VERSION ?= 
+TAG ?= undefined
+TIMEOUT ?= 300s
 
 # Define dry run flag based on DRY_RUN value
 HELM_DRY_RUN := $(if $(filter true,$(DRY_RUN)),--dry-run,)
+
+# Define version and tag config strings
+VERSION_CFG := $(if $(VERSION),--version $(VERSION),)
+TAG_CFG := $(if $(filter-out undefined,$(TAG)),--set image.tag=$(TAG),)
 
 
 # Shared target
@@ -27,27 +34,23 @@ init:  ## Add helm repo
 	@if [ "$(USE_LOCAL_CHART)" = true ]; then \
 		echo "Local repo doesn't need init"; \
 	else \
-		$(HELM) repo add $(HELM_REPO) $(HELM_REPO_URL); \
+		$(HELM) repo add $(HELM_REPO) $(HELM_REPO_URL) || $(HELM) repo update $(HELM_REPO); \
 	fi
 
 
 .PHONY: deploy
 deploy: _check_kubeconfig init ## deploy release with helm
-	@echo "deploy $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
-	$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) install $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN)
+	@echo "deploy $(APP) in $(ENV) env with version $(VERSION) $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
+	$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) install $(APP)-$(ENV) $(VERSION_CFG) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN) --wait --timeout=$(TIMEOUT)
 
 
 .PHONY: upgrade
 upgrade:  _check_kubeconfig ## upgrade release with helm
-	@echo "upgrade $(APP) in $(ENV) env $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
-	@if [ "$(TAG)" != "undefined" ] ; then \
-		$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml --set image.tag=$(TAG) $(HELM_DRY_RUN); \
-	else \
-		$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) upgrade $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(HELM_DRY_RUN); \
-	fi
+	@echo "upgrade $(APP) in $(ENV) env with version $(VERSION) $(if $(filter true,$(DRY_RUN)),[DRY RUN],)"
+	$(HELM) --kubeconfig $(KUBECONFIG) -n $(NS) upgrade $(APP)-$(ENV) $(VERSION_CFG) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml $(TAG_CFG) --wait --timeout=$(TIMEOUT) $(HELM_DRY_RUN)
 
 .PHONY: show
-show:  ## Show release with helm
+show: init ## Show release with helm
 	@echo "show $(APP) in $(ENV) env"
 	$(HELM) template $(APP)-$(ENV) $(HELM_REPO)/$(HELM_CHART) -f values-$(ENV).yaml
 
